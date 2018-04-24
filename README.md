@@ -8,7 +8,7 @@ Exporter for SSL Certificate metrics https://prometheus.io/
 1. Write the domain you want to check the expiration date of the ssl to JSON File.
 
 ```json
-{"domains":["example.com","example.net","example.org"]}
+{"domains":["example.com","example.net","example.org"],"isLocal":false}
 ```
 
 2. Hosting the JSON File to the web, such as Gist and S3.

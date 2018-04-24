@@ -22,10 +22,12 @@ type exporter struct {
 
 type config struct {
 	Domains []string `json:"domains"`
+	IsLocal bool     `json:"isLocal"`
 }
 
 var configUrl string
 var domains []string
+var isLocal bool
 var m = new(sync.Mutex)
 
 func newExporter() *exporter {
@@ -62,8 +64,16 @@ func (e *exporter) Collect(ch chan<- prometheus.Metric) {
 
 func check(domain string) float64 {
 	config := tls.Config{}
+	var addr = ""
 
-	conn, err := tls.Dial("tcp", domain+":443", &config)
+	if isLocal {
+		config.ServerName = domain
+		addr = "127.0.0.1:443"
+	} else {
+		addr = domain + ":443"
+	}
+
+	conn, err := tls.Dial("tcp", addr, &config)
 	if err != nil {
 		log.Fatal("domain:" + domain + " error:" + err.Error())
 		return math.NaN()
@@ -103,6 +113,7 @@ func load() {
 	defer m.Unlock()
 
 	domains = config.Domains
+	isLocal = config.IsLocal
 
 	log.Printf("Successful loading domains:%v", strings.Join(domains, ","))
 }
